@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<style type="text/css">
+		
+			#howto {
+				position: absolute;
+				top: 0;
+				right: 0;
+				width: 400px;
+				font-family: Arial;
+				font-size: 12px;
+				border: 1px solid #C2E1B4;
+				padding: 5px;
+				margin: 10px;
+				background-color: #EDFAE6;
+				border-radius: 6px;
+				overflow: hidden;
+				height: 16px;
+				-webkit-transition: height 0.5s ease-in-out;
+				-moz-transition: height 0.5s ease-in-out;
+				-ms-transition: height 0.5s ease-in-out;
+				-o-transition: height 0.5s ease-in-out;
+				transition: height 0.5s ease-in-out;
+				z-index: 100;
+			}
+			
+			#howto:hover {
+				height: 491px;
+			}
+			
+			#howto h1 {
+				font-family: Georgia, Arial;
+				font-weight: bold;
+				font-size: 16px;
+				margin: 0px;
+			}
+			
+			#howto code {
+				font-family: Menlo, monospace;
+				display: inline;
+				background-color: #FFF5B5;
+				border-radius: 3px;
+				border: 1px solid #BEB775;
+				padding: 0px 2px;
+			}
+			
+		
+			#buttons {
+				margin: 50px 0 15px 0;
+			}
+			
+			.selectorContainer {
+				margin: 0px 0px 20px 0px;
+				position: relative;
+			}
+			
+			.selectorContainer:after {
+				content: ".";
+			    display: block;
+			    height: 0;
+			    clear: both;
+			    visibility: hidden;
+			}
+			
+			.selectorContainer > div.css {
+				background-color: #FFF5B5;
+				border-radius: 3px;
+				border: 1px solid #BEB775;
+				position: absolute;
+				top: 20px;
+				bottom: 0px;
+				left: 430px;
+				right: 0px;
+				padding: 2px;
+				overflow: auto;
+			}
+			
+			.selectorContainer > div.css > p {
+				font-family: Menlo, monospace;
+				font-size: 11px;
+				margin: 0px;
+				padding: 0px;
+			}
+			
+			.selectorContainer div.input {
+				width: 410px;
+				padding: 0px 0px 0px 10px;
+				float: left;
+			}
+			
+			.selectorContainer div.input > div {
+				border-bottom: 1px solid #DDDDDD;
+				clear:both;
+			}
+			
+			.selectorContainer div.input > div:after {
+				content: ".";
+			    display: block;
+			    height: 0;
+			    clear: both;
+			    visibility: hidden;
+			}
+			
+			.selectorContainer div.input > div:last-child {
+				border-bottom: none;
+			}
+			
+			.selectorContainer input {
+				background-color: transparent;
+				border: none;
+				padding: 2px;
+				margin: 0px;
+				height: 14px;
+				font-family: Menlo, monospace;
+				font-size: 11px;
+				outline: none;
+				float: left;
+				display: block;
+			}
+			
+			.selectorContainer input.propname {
+				border-right: 1px solid #DDDDDD;
+				width: 150px;
+			}
+			
+			.selectorContainer input.propvalue {
+				width: 230px;
+			}
+			
+			div.errorexcl {
+				background-color: #CC0000;
+				height: 16px;
+				width: 16px;
+				border-radius: 8px;
+				float: left;
+				position: relative;
+			}
+			
+			div.errorexcl > span {
+				color: white;
+				font-weight: bold;
+				font-family: "Arial Black", Arial;
+				font-size: 16px;
+				position: absolute;
+				top: -4px;
+				left: 5px;
+			}
+			
+			.selectorContainer .containerTitle, .selectorContainer .containerFooter {
+				font-family: Menlo, monospace;
+				font-size: 16px;
+				clear: both;
+				margin: 0px;
+			}
+			
+			.selectorContainer .containerTitle {
+				padding: 0px 0px 4px 0px;
+			}
+			
+			.selectorContainer .containerFooter {
+				padding: 4px 0px 0px 0px;
+			}
+			
+			#json {
+				font-family: Menlo, monospace;
+				font-size: 11px;
+				border: 1px solid #888888;
+				background-color: #DFDFDF;
+				margin: 40px;
+				padding: 5px;
+			}
+			
+		</style>
+		<script type="text/javascript" src="src/all.js"></script>
+		<script>
+			window.addEventListener('load',function(e) {
+				
+				var config = {basePixelSize:10,parser:new emcalc.parser.ValueParser()};
+				var selectors = [];
+				var ctn = document.getElementById('selectors');
+				var addBtn = document.getElementById('addSelectorBtn');
+				addBtn.addEventListener('click',function(e){
+					var sel = new emcalc.ui.SelectorInput('selector'+(selectors.length+1),config);
+					sel.addRule();	//add an empty rule to start with
+					selectors.push(sel);
+					ctn.appendChild(sel.element);
+				},false);
+				
+				var saveBtn = document.getElementById('saveBtn');
+				saveBtn.addEventListener('click',function(e){
+					var jsonDiv = document.getElementById('json');
+					var buf = ['{'];
+					var first = true;
+					for(var i =0;i<selectors.length;++i) {
+						var sel = selectors[i];
+						
+						buf.push((!first?',"':'"')+sel.getName()+"\":"+sel.selector.toJSON()+"");
+						first = false;
+					}
+					buf.push('}');
+					jsonDiv.innerText = buf.join('');
+				},false);
+				
+				var loadBtn = document.getElementById('loadBtn');
+				loadBtn.addEventListener('click',function(e){
+					var jsonDiv = document.getElementById('json');
+					try {
+						var o = JSON.parse(jsonDiv.innerText);
+					} catch(e) {
+						alert(e);
+						return;
+					}
+					selectors = [];
+					ctn.innerHTML = '';
+					for(var key in o) {
+						if(o.hasOwnProperty(key)) {
+							var sel = new emcalc.ui.SelectorInput(key,config,o[key]);
+							selectors.push(sel);
+							ctn.appendChild(sel.element);
+						}
+					}
+				},false);
+
+				
+			},false);
+		</script>
+	</head>
+	<body>
+		<div id="howto">
+			<h1>How to use this</h1>
+			<p>This is a tool to help web developers calculate em units for their css sheets. You can add selectors by just giving them a name (here we don't care about the actual selector) and adding properties (you can make up your own names). You can only add properties that are expressed in a length/size dimension, either in px or in em. Other types (such as colors) are not relevant and thus not supported.</p>
+			<p>Property values can be given not just as literals (<code>1px</code> or <code>0.1em</code>) but also as expressions. Inside an expression, you can:</p>
+			<ul>
+				<li>Refer to other properties inside the same selector. These even get updated when the property gets renamed.</li>
+				<li>Combine literals and references to other properties using a mathematical operator (<code>+</code>,<code>-</code>,<code>*</code>,<code>/</code>).</li>
+				<li>Change the order of precedence of the mathematical operators using parenthesis</li>
+			</ul>
+			<p>Examples: <code>fontSize*2em</code>, <code>12px</code>, <code>(height-marginLeft)/2em</code>, <code>3em</code></p>
+			<p>All properties are converted as you type to their respective em values and presented as css in the grey box on the right for every selector. The base font size is 10px.</p>
+			<p>You can add a new property to a selector by pressing enter when editing the value of another property of the same selector.</p>
+			<p>The save button generates a JSON string you later use to restore the selectors with the load button. It doesn't save to disk though, so you need to do that yourself.</p>
+			<p><strong>Currently not supported</strong>: inhereting selectors, changing the base font size, removing a selector, numerical literals without a unit in mathematical expressions (you always have to put <code>em</code>)</p>
+		</div>
+		<div id="buttons">
+			<input type="button" id="addSelectorBtn" value="Add selector"/> <input type="button" id="saveBtn" value="Save"/> <input type="button" id="loadBtn" value="Load"/>
+		</div>
+		<div id="selectors"></div>
+		<div id="json" contenteditable="true">
+			
+		</div>
+	</body>
+</html>

@@ -1,0 +1,26 @@
+#!/bin/sh
+echo "RUNNING JSLINT ..."
+rm src/all.js
+cat src/namespace.js >> src/all.js
+cat src/util.js >> src/all.js
+cat src/tokenizer.js >> src/all.js
+cat src/tree.js >> src/all.js
+cat src/parser.js >> src/all.js
+cat src/selector.js >> src/all.js
+cat src/ui.js >> src/all.js
+
+#java -jar tools/jslint4java.jar --devel --browser --sloppy --vars --white --plusplus --maxerr 50 --indent 4 src/all.js
+
+
+echo "RUNNING UNIT TESTS ..." 
+java -jar tools/JsTestDriver.jar --port 9876 --browser /Applications/Firefox.app/Contents/MacOS/firefox --tests all
+#echo "COMPILING ..."
+#java -jar tools/compiler.jar --compilation_level SIMPLE_OPTIMIZATIONS --js_output_file src/emcalc-compiled.js \
+#	--js src/ui.js \
+#	--js src/parser.js \
+#	--js src/selector.js \
+#	--js src/util.js \
+#	--js src/namespace.js \
+#	--js src/tokenizer.js \
+#	--js src/tree.js
+	
